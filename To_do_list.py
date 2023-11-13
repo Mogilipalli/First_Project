@@ -1,98 +1,74 @@
-import tkinter
-from tkinter import *
+import tkinter as tk
 
-root=Tk()
-root.title("To-Do-List")
-root.geometry("400x650+400+250")
-root.resizable(False,False)
+class ToDoListApp:
+    def _init_(self, root):
+        self.root = root
+        self.root.title("To-Do List")
 
-task_list= []
+        self.tasks = []
 
+        self.task_entry = tk.Entry(root, width=30)
+        self.task_entry.pack(pady=10)
 
-def addTask():
-    task = task_entry.get()
-    task_entry.delete(0, END)
+        self.add_button = tk.Button(root, text="Add Task", command=self.add_task)
+        self.add_button.pack()
 
-    if task:
-        with open("tasklist",'a')as taskfile:
-            taskfile.write(f"\n{task}")
-        task_list.append(task)
-        listbox.insert (END ,task)
+        self.task_listbox = tk.Listbox(root, width=30)
+        self.task_listbox.pack(pady=10)
 
-def deleteTask():
-    global task_list
-    task =str(listbox.get(ANCHOR))
-    if task in task_list:
-        task_list.remove(task)
-        with open("tasklist.txt",'w')as taskfile:
-            for task in task_list:
-                taskfile.write(task+"\n")
+        self.update_button = tk.Button(root, text="Update Task", command=self.update_task)
+        self.update_button.pack()
 
-        listbox.delete(ANCHOR)
+        self.mark_done_button = tk.Button(root, text="Mark as Done", command=self.mark_as_done)
+        self.mark_done_button.pack()
 
+        self.delete_button = tk.Button(root, text="Delete Task", command=self.delete_task)
+        self.delete_button.pack()
 
-def openTaskFile():
+        self.display_button = tk.Button(root, text="Display Tasks", command=self.display_tasks)
+        self.display_button.pack()
 
-    try:
-        global task_list
+    def add_task(self):
+        task = self.task_entry.get()
+        if task:
+            self.tasks.append({"task": task, "done": False})
+            self.task_listbox.insert(tk.END, task)
+            self.task_entry.delete(0, tk.END)
 
-        with open("tasklist.txt","r")as taskfile:
-            tasks = taskfile.readlines()
-    
-        for task in tasks:
-            if task !='\n':
-                task_list.append(task)
-                listbox.insert(END ,task)
-    except:
-        file=open('tasklist.txt','w')
-        file.close()
-    
+    def update_task(self):
+        selected_task_index = self.task_listbox.curselection()
+        if selected_task_index:
+            new_task = self.task_entry.get()
+            if new_task:
+                index = selected_task_index[0]
+                self.tasks[index] = {"task": new_task, "done": False}
+                self.task_listbox.delete(index)
+                self.task_listbox.insert(index, new_task)
+                self.task_entry.delete(0, tk.END)
 
-Image_icon=PhotoImage(file="Image/task.png")
-root.iconphoto(False,Image_icon)
+    def mark_as_done(self):
+        selected_task_index = self.task_listbox.curselection()
+        if selected_task_index:
+            index = selected_task_index[0]
+            self.tasks[index]["done"] = True
+            task = self.tasks[index]["task"]
+            self.task_listbox.delete(index)
+            self.task_listbox.insert(tk.END, f"{task} (Done)")
 
-TopImage=PhotoImage(file="Image/topbar.png")
-Label(root,image=TopImage,bg="#008000").pack()
+    def delete_task(self):
+        selected_task_index = self.task_listbox.curselection()
+        if selected_task_index:
+            index = selected_task_index[0]
+            del self.tasks[index]
+            self.task_listbox.delete(index)
 
-dockImage=PhotoImage(file="Image/dock.png")
-Label(root,image=dockImage,bg="#32405b").place(x=40,y=30)
+    def display_tasks(self):
+        self.task_listbox.delete(0, tk.END)
+        for task in self.tasks:
+            status = "Done" if task["done"] else "Not Done"
+            self.task_listbox.insert(tk.END, f"{task['task']} ({status})")
 
-noteImage=PhotoImage(file="Image/task.png")
-Label(root,image=noteImage,bg="#32405b").place(x=40,y=30)
-
-heading=Label(root,text="ALL TASKS",font="italic",fg="black",bg="#32405b")
-heading.place(x=130,y=20)
-
-
-frame= Frame(root,width=400,height=50,bg="white")
-frame.place(x=0,y=180)
-
-task=StringVar()
-task_entry=Entry(frame,width=18,font="italic",bd=0)
-task_entry.place(x=10,y=7)
-task_entry.focus()
-
-button=Button(frame,text="ADD",font="italic",width=7,bg="#5a95ff",fg="#fff",bd=0,command=addTask)
-button.place(x=300,y=0)
-
-
-frame1= Frame(root,bd=3,width=700,height=200,bg="#32405b")
-frame1.pack(pady=(160,0))
-
-listbox=Listbox(frame1,font=("italic",12),width=40,height=16,bg="#32405b",fg="white",cursor="hand2",selectbackground="#5a95ff")
-listbox.pack(side=LEFT , fill=BOTH , padx=2)
-scrollbar= Scrollbar(frame1)
-scrollbar.pack(side= RIGHT ,fill= BOTH)
-
-listbox.config(yscrollcommand=scrollbar.set)
-scrollbar.config(command=listbox.yview)
-
-
-openTaskFile()
-
-Delete_icon=PhotoImage(file="Image/delete.png")
-Button(root,image=Delete_icon,bd=0,command=deleteTask).pack(side=BOTTOM,pady=13)
-
-
-
-root.mainloop()
+if _name== "__main_":
+    root = tk.Tk()
+    app = ToDoListApp(root)
+    root.mainloop()

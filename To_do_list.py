@@ -1,7 +1,7 @@
 import tkinter as tk
 
 class ToDoListApp:
-    def _init_(self, root):
+    def __init__(self, root):
         self.root = root
         self.root.title("To-Do List")
 
@@ -68,7 +68,7 @@ class ToDoListApp:
             status = "Done" if task["done"] else "Not Done"
             self.task_listbox.insert(tk.END, f"{task['task']} ({status})")
 
-if _name== "__main_":
+if __name__== "__main__":
     root = tk.Tk()
     app = ToDoListApp(root)
     root.mainloop()
